@@ -50,7 +50,7 @@ export class WisepanelClient {
   private apiKey: string;
 
   constructor() {
-    this.apiUrl = process.env.WISEPANEL_API_URL || 'https://quroi-api-2025.fly.dev';
+    this.apiUrl = process.env.WISEPANEL_API_URL || 'https://api.wisepanel.ai';
     const key = process.env.WISEPANEL_API_KEY;
     if (!key) throw new Error('WISEPANEL_API_KEY environment variable is required. Generate one at wisepanel.ai/settings');
     this.apiKey = key;
