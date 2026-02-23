@@ -30,6 +30,7 @@ export interface StreamOptions {
   model_group?: string;
   rounds?: number;
   context?: string;
+  compression?: string;
   short_responses?: boolean;
 }
 
@@ -70,11 +71,11 @@ export class WisepanelClient {
         ? `${options.context}\n\n${options.question}`
         : options.question,
       session_id: `mcp-${Date.now()}`,
-      polyhedron_type: options.topology || 'tetrahedron',
+      polyhedron_type: options.topology || 'small',
       num_rounds: options.rounds || 1,
       model_group: options.model_group || 'mixed',
       short_response_mode: options.short_responses || false,
-      context_strategy: 'moderate',
+      context_strategy: options.compression || 'aggressive',
     };
 
     const res = await fetch(

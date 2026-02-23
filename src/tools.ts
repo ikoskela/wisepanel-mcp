@@ -26,16 +26,21 @@ const TOOL_DEFINITIONS = [
         question: { type: 'string', description: 'The question or topic for the panel to deliberate' },
         topology: {
           type: 'string',
-          enum: ['tetrahedron', 'octahedron', 'icosahedron'],
-          description: 'Panel geometry: tetrahedron (4 panelists), octahedron (6), icosahedron (12). Default: tetrahedron',
+          enum: ['small', 'medium', 'large'],
+          description: 'Panel size: small (faster for exploration), medium (balanced speed & coverage), large (slow but thorough). Default: small',
         },
         model_group: {
           type: 'string',
-          enum: ['mixed', 'fast', 'smart', 'informed'],
-          description: 'Model selection: mixed (diverse providers), fast (speed-optimized), smart (reasoning-optimized), informed (search-augmented). Default: mixed',
+          enum: ['mixed', 'smart', 'fast', 'cheap', 'informed', 'large', 'openai', 'anthropic', 'google', 'perplexity'],
+          description: 'Model selection: mixed (random assignment), smart (most intelligent), fast (quick responses), cheap (cost-optimized), informed (search-capable), large (largest context). Or single provider: openai, anthropic, google, perplexity. Default: mixed',
         },
         rounds: { type: 'number', minimum: 1, maximum: 5, description: 'Deliberation rounds (1-5). More rounds deepen the debate. Default: 1' },
         context: { type: 'string', description: 'Additional context to frame the deliberation' },
+        compression: {
+          type: 'string',
+          enum: ['none', 'moderate', 'aggressive'],
+          description: 'Context compression: none (higher token usage), moderate (balanced), aggressive (lower token usage). Default: aggressive',
+        },
         short_responses: { type: 'boolean', description: 'Request concise panelist responses. Default: false' },
       },
       required: ['question'],
@@ -162,27 +167,10 @@ function extractOptions(args: Record<string, unknown>): StreamOptions {
     model_group: args.model_group as string | undefined,
     rounds: args.rounds as number | undefined,
     context: args.context as string | undefined,
+    compression: args.compression as string | undefined,
     short_responses: args.short_responses as boolean | undefined,
   };
 }
-
-// handleDeliberate commented out — synchronous blocking tool superseded by start+poll flow.
-// async function handleDeliberate(args: Record<string, unknown>): Promise<string> {
-//   const options = extractOptions(args);
-//   const events: SSEEvent[] = [];
-//   const abort = new AbortController();
-//   const timeout = setTimeout(() => abort.abort(), 5 * 60_000);
-//   try {
-//     await client.startStream(options, (event) => { events.push(event as SSEEvent); }, abort.signal);
-//   } finally { clearTimeout(timeout); }
-//   const final = events.find(e => e.type === 'final');
-//   if (final) return formatFinalResult(final);
-//   const error = events.find(e => e.type === 'error');
-//   if (error) return `Error: ${error.message || error.error || 'Unknown error'}`;
-//   const responses = events.filter(e => e.type === 'agent_response');
-//   if (responses.length) return responses.map(formatAgentResponse).join('\n\n---\n\n');
-//   return 'Deliberation completed but no responses received.';
-// }
 
 async function handleStart(args: Record<string, unknown>): Promise<string> {
   const options = extractOptions(args);

@@ -235,7 +235,7 @@ function stripThinkTags(message: string): string {
 }
 
 function inferTopology(agentCount: number): string {
-  if (agentCount <= 4) return 'tetrahedron';
-  if (agentCount <= 6) return 'octahedron';
-  return 'icosahedron';
+  if (agentCount <= 4) return 'small';
+  if (agentCount <= 6) return 'medium';
+  return 'large';
 }

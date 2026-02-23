@@ -33,10 +33,11 @@ Start a deliberation. Convenes a panel of AI models to debate a question from as
 | Parameter | Type | Description |
 |---|---|---|
 | `question` | string (required) | The topic for the panel to deliberate |
-| `topology` | string | Panel geometry: `tetrahedron` (4 panelists), `octahedron` (6), `icosahedron` (12) |
-| `model_group` | string | `mixed` (diverse providers), `fast`, `smart` (reasoning-optimized), `informed` (search-augmented) |
+| `topology` | string | Panel size: `small` (faster), `medium` (balanced), `large` (thorough) |
+| `model_group` | string | `mixed` (random), `smart`, `fast`, `cheap`, `informed` (search-augmented), `large` (largest context). Or single provider: `openai`, `anthropic`, `google`, `perplexity` |
 | `rounds` | number | Deliberation rounds (1-5). More rounds deepen the debate |
 | `context` | string | Additional framing context |
+| `compression` | string | Context compression: `none`, `moderate`, `aggressive` (default) |
 | `short_responses` | boolean | Request concise panelist responses |
 
 ### `wisepanel_poll`
