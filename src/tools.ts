@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { WisepanelClient, StreamOptions, PublishError } from './client.js';
 import { EventBuffer, SSEEvent } from './event-buffer.js';
 
@@ -36,6 +37,7 @@ const TOOL_DEFINITIONS = [
         },
         rounds: { type: 'number', minimum: 1, maximum: 5, description: 'Deliberation rounds (1-5). More rounds deepen the debate. Default: 1' },
         context: { type: 'string', description: 'Additional context to frame the deliberation' },
+        context_file: { type: 'string', description: 'Path to a file whose contents will be used as context. Use this for large payloads that exceed inline string limits. If both context and context_file are provided, they are concatenated.' },
         compression: {
           type: 'string',
           enum: ['none', 'moderate', 'aggressive'],
@@ -161,12 +163,26 @@ function formatFinalResult(final: SSEEvent): string {
 // --- Handlers ---
 
 function extractOptions(args: Record<string, unknown>): StreamOptions {
+  let context = (args.context as string | undefined) || '';
+  const contextFile = args.context_file as string | undefined;
+
+  if (contextFile) {
+    try {
+      const fileContent = readFileSync(contextFile, 'utf-8');
+      context = context ? `${context}\n\n${fileContent}` : fileContent;
+      process.stderr.write(`[Wisepanel MCP] Loaded context_file: ${contextFile} (${fileContent.length} chars)\n`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to read context_file "${contextFile}": ${msg}`);
+    }
+  }
+
   return {
     question: args.question as string,
     topology: args.topology as string | undefined,
     model_group: args.model_group as string | undefined,
     rounds: args.rounds as number | undefined,
-    context: args.context as string | undefined,
+    context: context || undefined,
     compression: args.compression as string | undefined,
     short_responses: args.short_responses as boolean | undefined,
   };
