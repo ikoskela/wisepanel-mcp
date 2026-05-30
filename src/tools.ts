@@ -44,6 +44,14 @@ const TOOL_DEFINITIONS = [
           description: 'Context compression: none (higher token usage), moderate (balanced), aggressive (lower token usage). Default: aggressive',
         },
         short_responses: { type: 'boolean', description: 'Request concise panelist responses. Default: false' },
+        show_and_audit_reasoning: {
+          type: 'boolean',
+          description: 'Append Chain-of-X scaffolding to every panelist: Part 1 (reasoning quality requirements — explicit attribution, assumption surfacing, counterfactual contingencies, robustness assessment) and Part 2 (cross-analysis audit — agents flag prior agents\' attribution gaps, confabulated specifications, probability/evidence mismatches, etc.). Substantially raises rigor for high-stakes deliberation. Increases token usage and run cost (~1.45x scaffolding-only multiplier). Default: false',
+        },
+        web_search_enabled: {
+          type: 'boolean',
+          description: 'Enable native web search (Anthropic web_search_20250305, Google googleSearch grounding) for agents to verify specific factual claims — dates, statutes, case citations, fees, version numbers, jurisdiction-specific rules, etc. Requires the Smart model group (other groups have search disabled or unavailable). Increases run cost (~3.25x search-only multiplier; ~6.5x when combined with audit scaffolding). Default: false',
+        },
       },
       required: ['question'],
     },
@@ -185,6 +193,8 @@ function extractOptions(args: Record<string, unknown>): StreamOptions {
     context: context || undefined,
     compression: args.compression as string | undefined,
     short_responses: args.short_responses as boolean | undefined,
+    show_and_audit_reasoning: args.show_and_audit_reasoning as boolean | undefined,
+    web_search_enabled: args.web_search_enabled as boolean | undefined,
   };
 }
 

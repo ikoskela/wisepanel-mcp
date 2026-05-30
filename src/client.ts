@@ -32,6 +32,8 @@ export interface StreamOptions {
   context?: string;
   compression?: string;
   short_responses?: boolean;
+  show_and_audit_reasoning?: boolean;
+  web_search_enabled?: boolean;
 }
 
 export class PublishError extends Error {
@@ -76,6 +78,8 @@ export class WisepanelClient {
       model_group: options.model_group || 'mixed',
       short_response_mode: options.short_responses || false,
       context_strategy: options.compression || 'aggressive',
+      show_and_audit_reasoning: options.show_and_audit_reasoning || false,
+      web_search_enabled: options.web_search_enabled || false,
     };
 
     const res = await fetch(
