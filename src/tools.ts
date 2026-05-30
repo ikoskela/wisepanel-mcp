@@ -33,7 +33,7 @@ const TOOL_DEFINITIONS = [
         model_group: {
           type: 'string',
           enum: ['mixed', 'smart', 'fast', 'cheap', 'informed', 'large', 'openai', 'anthropic', 'google', 'perplexity'],
-          description: 'Model selection: mixed (random assignment), smart (most intelligent), fast (quick responses), cheap (cost-optimized), informed (search-capable), large (largest context). Or single provider: openai, anthropic, google, perplexity. Default: mixed',
+          description: 'Model selection: smart (most intelligent — current flagships: Opus 4.8, GPT-5.5, Gemini 3.1 Pro Preview), mixed (random assignment across all providers), fast (quick responses), cheap (cost-optimized), informed (search-capable), large (largest context). Or single provider: openai, anthropic, google, perplexity. Default: smart (MCP use cases tend toward high-stakes deliberation where flagship rigor is worth the cost).',
         },
         rounds: { type: 'number', minimum: 1, maximum: 5, description: 'Deliberation rounds (1-5). More rounds deepen the debate. Default: 1' },
         context: { type: 'string', description: 'Additional context to frame the deliberation' },

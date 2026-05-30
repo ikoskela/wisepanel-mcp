@@ -75,7 +75,7 @@ export class WisepanelClient {
       session_id: `mcp-${Date.now()}`,
       polyhedron_type: options.topology || 'small',
       num_rounds: options.rounds || 1,
-      model_group: options.model_group || 'mixed',
+      model_group: options.model_group || 'smart',
       short_response_mode: options.short_responses || false,
       context_strategy: options.compression || 'aggressive',
       show_and_audit_reasoning: options.show_and_audit_reasoning || false,
