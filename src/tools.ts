@@ -13,11 +13,11 @@ const TOOL_DEFINITIONS = [
   {
     name: 'wisepanel_start',
     description:
-      'Start a Wisepanel deliberation. Convenes a panel of AI models (Claude, Gemini, Perplexity) ' +
+      'Start a Wisepanel deliberation. Convenes a panel of AI models (Claude, GPT, Gemini, Perplexity) on a polyhedral topology (tetrahedron / octahedron / icosahedron for small / medium / large) ' +
       'to debate a question from assigned perspectives. Returns run_id immediately. ' +
       'After starting, poll with wisepanel_poll every 10-15 seconds. When an agent_response event appears, ' +
       'briefly summarize that panelist\'s key argument to the user before polling again. ' +
-      'Each panelist participates in multiple conversation nodes, so total responses will exceed panel size. ' +
+      'POLYHEDRAL MECHANIC: agents sit on EDGES of the polyhedron, not at vertices. Each agent connects two vertices (conversation nodes) and contributes at BOTH endpoints in every round — so a single round produces ~2 responses per agent (total ≈ num_agents × 2). Do not confuse "rounds" with turn-taking — rounds are full polyhedron traversals. See the rounds parameter description for details. ' +
       'When status is "completed", provide a final synthesis of all perspectives, ' +
       'then ask the user if they\'d like to publish to the Wisepanel Commons using wisepanel_publish. ' +
       'Do NOT call wisepanel_result after polling — you already have all the data from poll events.',
@@ -35,7 +35,12 @@ const TOOL_DEFINITIONS = [
           enum: ['mixed', 'smart', 'fast', 'cheap', 'informed', 'large', 'openai', 'anthropic', 'google', 'perplexity'],
           description: 'Model selection: smart (most intelligent — current flagships: Opus 4.8, GPT-5.5, Gemini 3.1 Pro Preview), mixed (random assignment across all providers), fast (quick responses), cheap (cost-optimized), informed (search-capable), large (largest context). Or single provider: openai, anthropic, google, perplexity. Default: smart (MCP use cases tend toward high-stakes deliberation where flagship rigor is worth the cost).',
         },
-        rounds: { type: 'number', minimum: 1, maximum: 5, description: 'Deliberation rounds (1-5). More rounds deepen the debate. Default: 1' },
+        rounds: {
+          type: 'number',
+          minimum: 1,
+          maximum: 5,
+          description: 'Polyhedron traversals (1-5). IMPORTANT: each agent sits on an EDGE of the polyhedron connecting two vertices (conversation nodes). In a single round, every agent participates TWICE — once contributing to its "left" vertex and once to its "right" vertex. So rounds=1 already produces ~2 responses per agent (total ≈ num_agents × 2). Higher rounds add additional full polyhedron traversals where every agent re-participates at both vertex endpoints reacting to the prior round\'s outputs. rounds=1 is already substantial deliberation; use 2+ only when agents need to react to other agents\' completed positions across the full polyhedron — e.g., binary strategic decisions with sharply opposing arguments that benefit from second-pass reaction. Default: 1.',
+        },
         context: { type: 'string', description: 'Additional context to frame the deliberation' },
         context_file: { type: 'string', description: 'Path to a file whose contents will be used as context. Use this for large payloads that exceed inline string limits. If both context and context_file are provided, they are concatenated.' },
         compression: {
