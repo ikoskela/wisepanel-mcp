@@ -1,6 +1,6 @@
 {
   "name": "wisepanel-mcp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "MCP server for Wisepanel multi-agent deliberation platform. Run deliberations, stream results, and publish to the Wisepanel Commons from any MCP client.",
   "type": "module",
   "main": "dist/index.js",
