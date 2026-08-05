@@ -32,8 +32,8 @@ const TOOL_DEFINITIONS = [
         },
         model_group: {
           type: 'string',
-          enum: ['mixed', 'smart', 'fast', 'cheap', 'informed', 'large', 'openai', 'anthropic', 'google', 'perplexity'],
-          description: 'Model selection: smart (most intelligent — current flagships: Opus 4.8, GPT-5.5, Gemini 3.1 Pro Preview), mixed (random assignment across all providers), fast (quick responses), cheap (cost-optimized), informed (search-capable), large (largest context). Or single provider: openai, anthropic, google, perplexity. Default: smart (MCP use cases tend toward high-stakes deliberation where flagship rigor is worth the cost).',
+          enum: ['mixed', 'smart', 'fast', 'cheap', 'informed', 'large', 'openai', 'anthropic', 'anthropic-fable', 'google', 'perplexity'],
+          description: 'Model selection: smart (most intelligent — current flagships: Opus 5, GPT-5.5, Gemini 3.1 Pro Preview), mixed (random assignment across all providers), fast (quick responses), cheap (cost-optimized), informed (search-capable), large (largest context). Or single provider: openai, anthropic, google, perplexity. anthropic-fable runs Claude Fable 5 on EVERY agent — Anthropic\'s most capable model, but roughly 2x the token cost of smart, slower, and with an older knowledge cutoff (Jan 2026 vs May 2026 for Opus 5). Do NOT select anthropic-fable unless the user has explicitly asked for maximum capability and accepted the higher cost. Default: smart (MCP use cases tend toward high-stakes deliberation where flagship rigor is worth the cost).',
         },
         rounds: {
           type: 'number',
