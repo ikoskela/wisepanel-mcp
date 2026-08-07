@@ -6,7 +6,34 @@ Run deliberations across Claude, Gemini, and Perplexity. Stream panelist respons
 
 ## Quick Start
 
-Add to your MCP client config (e.g. `~/.mcp.json` for Claude Code):
+Get your API key at [wisepanel.ai/settings](https://wisepanel.ai/settings), then:
+
+```bash
+claude mcp add wisepanel --scope user \
+  --env WISEPANEL_API_KEY=wp_sk_ExampleOnly0000-replace-with-your-own-key \
+  -- npx -y wisepanel-mcp
+```
+
+Paste the key **exactly as shown on the settings page** — the whole `wp_sk_…` string and
+nothing else. Quotes around it are optional and harmless. Do **not** add a `Bearer` prefix:
+the server sends `Authorization: Bearer <your-key>` itself, so including it yields
+`Bearer Bearer wp_sk_…` and auth fails.
+
+Restart Claude Code and run `/mcp` — `wisepanel` should show as connected.
+
+`✔ Connected` only means the server process launched. Your API key isn't checked
+until the first call, so a bad key still shows as connected. To confirm auth
+actually works, run a deliberation and check that it returns a `run_id`.
+
+> **This is a stdio server, not a remote one.** There is no HTTP endpoint —
+> `claude mcp add --transport http` will not work no matter what URL you give it.
+> Everything after the `--` is the command that launches the server locally.
+
+<details>
+<summary>Other MCP clients (manual config)</summary>
+
+Add to your client's config file — `~/.claude.json` for Claude Code, or the
+equivalent for Cursor, Windsurf, Claude Desktop, etc.:
 
 ```json
 {
@@ -22,7 +49,35 @@ Add to your MCP client config (e.g. `~/.mcp.json` for Claude Code):
 }
 ```
 
-Get your API key at [wisepanel.ai/settings](https://wisepanel.ai/settings).
+</details>
+
+### Configuration
+
+| Variable | Required | Default |
+|---|---|---|
+| `WISEPANEL_API_KEY` | yes | — |
+| `WISEPANEL_API_URL` | no | `https://api.wisepanel.ai` |
+
+### Troubleshooting
+
+**`'url' is not a valid URL`** — the server was added with `--transport http`.
+Remove it and re-add using the stdio command above:
+
+```bash
+claude mcp remove wisepanel --scope user
+```
+
+**`WISEPANEL_API_KEY environment variable is required`** — the key didn't reach
+the server process. Pass it with `--env` as shown, not as an `Authorization`
+header; headers apply to remote servers only.
+
+**`API 401` / not authenticated despite a valid key** — check the stored value with
+`claude mcp get wisepanel`. It must be the bare `wp_sk_…` string. A `Bearer ` prefix, a
+trailing space, or a partial paste are the usual causes.
+
+**Not authenticated** — verify the key is active at
+[wisepanel.ai/settings](https://wisepanel.ai/settings). Keys are secrets: never
+paste them into chat, issues, or screenshots. If one leaks, revoke and reissue it.
 
 ## Tools
 
