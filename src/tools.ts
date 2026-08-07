@@ -51,7 +51,7 @@ const TOOL_DEFINITIONS = [
         short_responses: { type: 'boolean', description: 'Request concise panelist responses. Default: false' },
         show_and_audit_reasoning: {
           type: 'boolean',
-          description: 'Append Chain-of-X scaffolding to every panelist: Part 1 (reasoning quality requirements — explicit attribution, assumption surfacing, counterfactual contingencies, robustness assessment) and Part 2 (cross-analysis audit — agents flag prior agents\' attribution gaps, confabulated specifications, probability/evidence mismatches, etc.). Substantially raises rigor for high-stakes deliberation. Increases token usage and run cost (~1.45x scaffolding-only multiplier). Default: false',
+          description: 'Append Chain-of-X scaffolding to every panelist: Part 1 (reasoning quality requirements — explicit attribution, assumption surfacing, counterfactual contingencies, robustness assessment) and Part 2 (cross-analysis audit — agents flag prior agents\' attribution gaps, confabulated specifications, probability/evidence mismatches, etc.). Substantially raises rigor for high-stakes deliberation. Increases token usage and run cost (~1.45x scaffolding-only multiplier). ON BY DEFAULT — omit this parameter to accept it. Pass false only if the user has asked for a cheaper run and accepted lower rigor.',
         },
         web_search_enabled: {
           type: 'boolean',

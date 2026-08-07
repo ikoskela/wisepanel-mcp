@@ -88,12 +88,52 @@ Start a deliberation. Convenes a panel of AI models to debate a question from as
 | Parameter | Type | Description |
 |---|---|---|
 | `question` | string (required) | The topic for the panel to deliberate |
-| `topology` | string | Panel size: `small` (faster), `medium` (balanced), `large` (thorough) |
-| `model_group` | string | `mixed` (random), `smart`, `fast`, `cheap`, `informed` (search-augmented), `large` (largest context). Or single provider: `openai`, `anthropic`, `google`, `perplexity` |
-| `rounds` | number | Deliberation rounds (1-5). More rounds deepen the debate |
+| `topology` | string | Panel size: `small` (faster), `medium` (balanced), `large` (thorough). Default `small` |
+| `model_group` | string | `smart` (default, current flagships), `mixed` (random across providers), `fast`, `cheap`, `informed` (search-capable), `large` (largest context). Or single provider: `openai`, `anthropic`, `anthropic-fable`, `google`, `perplexity` |
+| `rounds` | number | Polyhedron traversals (1-5). Default `1` — see [Rounds](#rounds) |
 | `context` | string | Additional framing context |
+| `context_file` | string | Path to a file used as context, for payloads too large to pass inline. Concatenated after `context` if both are given |
 | `compression` | string | Context compression: `none`, `moderate`, `aggressive` (default) |
-| `short_responses` | boolean | Request concise panelist responses |
+| `short_responses` | boolean | Request concise panelist responses. Default `false` |
+| `show_and_audit_reasoning` | boolean | Reasoning-quality scaffolding + cross-agent audit. **Server default is on** — omit to accept it, pass `false` to opt out. ~1.45x cost |
+| `web_search_enabled` | boolean | Let agents verify factual claims via native provider web search. Requires `smart`. Default `false`. ~3.25x cost, ~6.5x combined with audit |
+
+<a name="rounds"></a>
+#### Rounds
+
+Agents sit on the **edges** of the polyhedron, not the vertices. Each agent connects two
+vertices (conversation nodes) and contributes at **both** endpoints every round — so
+`rounds: 1` already produces roughly `num_agents × 2` responses.
+
+Rounds are full polyhedron traversals, not chat turns. `rounds: 1` is already substantial
+deliberation. Use 2+ only when agents need to react to other agents' *completed* positions —
+e.g. a binary strategic decision with sharply opposing arguments.
+
+### `wisepanel_magic_prompt`
+
+Rewrite a question to remove framing that would bias the panel toward a predetermined
+answer — loaded wording, embedded assumptions, false binaries — while preserving intent.
+Optional pre-step before `wisepanel_start`.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `question` | string (required) | The question to rewrite, as the user wrote it |
+
+Returns one of three outcomes. The original question is echoed back in every case, so you
+can always fall back to it:
+
+| `outcome` | Meaning | Billed |
+|---|---|---|
+| `transformed` | Rewritten. Response includes `rewritten` | yes |
+| `no_change_needed` | Already unbiased — use the original | no |
+| `fail_closed` | No safe rewrite produced — use the original | no |
+
+**Show the user both versions and let them choose.** The rewrite can shift emphasis in ways
+they may not want, so it should never be substituted silently. This mirrors the web app,
+where the transform runs only on an explicit click, behind a cost confirmation, with revert
+available.
+
+Billed separately from the deliberation, and only when the text actually changes.
 
 ### `wisepanel_poll`
 
