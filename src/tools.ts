@@ -62,6 +62,30 @@ const TOOL_DEFINITIONS = [
     },
   },
   {
+    name: 'wisepanel_magic_prompt',
+    description:
+      'Rewrite a question to remove framing that would bias a panel toward a predetermined answer — ' +
+      'loaded wording, embedded assumptions, false binaries — while preserving the asker\'s actual intent. ' +
+      'Optional pre-step before wisepanel_start; deliberations run fine without it. ' +
+      'ALWAYS show the user the rewritten text and let them decide whether to use it. Never substitute it silently — ' +
+      'it is their question, and the rewrite can shift emphasis in ways they may not want. ' +
+      'Keep the original: if they prefer it, pass the original to wisepanel_start unchanged. ' +
+      'Billed as a separate charge from the deliberation, and only when the text actually changes. ' +
+      'Returns outcome.kind: "transformed" (rewritten — show both versions), ' +
+      '"no_change_needed" (already unbiased — use the original, no charge), or ' +
+      '"fail_closed" (could not produce a safe rewrite — use the original, no charge).',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        question: {
+          type: 'string',
+          description: 'The question to rewrite. Pass the user\'s question as they wrote it.',
+        },
+      },
+      required: ['question'],
+    },
+  },
+  {
     name: 'wisepanel_poll',
     description:
       'Poll a running Wisepanel deliberation for new events. Long-polls up to 15 seconds, ' +
@@ -379,12 +403,50 @@ function handleListRuns(): string {
 
 // --- Exports ---
 
+async function handleMagicPrompt(args: Record<string, unknown>): Promise<string> {
+  const question = (args.question as string ?? '').trim();
+  if (!question) throw new Error('question is required and must be non-empty');
+
+  const res = await client.magicPrompt(question);
+  const { outcome, charge } = res;
+
+  // The original is echoed back on every outcome so the caller can always fall
+  // back to it, and so "show the user both versions" needs no extra bookkeeping.
+  const base = {
+    outcome: outcome.kind,
+    original: question,
+    charged_usd: charge?.charged ? charge.usdAmount : 0,
+  };
+
+  if (outcome.kind === 'transformed') {
+    return JSON.stringify({
+      ...base,
+      rewritten: outcome.text,
+      next_step:
+        'Show the user both versions and ask which to use. Pass their choice to wisepanel_start.',
+    }, null, 2);
+  }
+
+  if (outcome.kind === 'no_change_needed') {
+    return JSON.stringify({
+      ...base,
+      next_step: 'No bias found. Use the original question as written.',
+    }, null, 2);
+  }
+
+  return JSON.stringify({
+    ...base,
+    next_step: 'Could not produce a safe rewrite. Use the original question as written.',
+  }, null, 2);
+}
+
 export async function handleToolCall(name: string, args: Record<string, unknown>): Promise<string> {
   switch (name) {
     case 'wisepanel_start': return handleStart(args);
     case 'wisepanel_poll': return handlePoll(args);
     case 'wisepanel_result': return handleResult(args);
     case 'wisepanel_cancel': return handleCancel(args);
+    case 'wisepanel_magic_prompt': return handleMagicPrompt(args);
     case 'wisepanel_publish': return handlePublish(args);
     case 'wisepanel_list_runs': return handleListRuns();
     default: throw new Error(`Unknown tool: ${name}`);

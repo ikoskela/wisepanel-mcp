@@ -18,6 +18,17 @@ export interface CommonsPublishData {
   metadata?: Record<string, unknown>;
 }
 
+export interface MagicPromptResponse {
+  success: boolean;
+  outcome:
+    | { kind: 'transformed'; text: string }
+    | { kind: 'no_change_needed'; text: string }
+    | { kind: 'fail_closed'; text: string; failures: Array<{ gate: string; index: number; reason: string }> };
+  llm: { provider: string; model: string; tier: string; latencyMs: number };
+  charge: { charged: boolean; usdAmount: number; remainingBalance: number; error?: string };
+  metaPromptVersion?: string;
+}
+
 export interface CommonsPublishResult {
   slug: string;
   url: string;
@@ -128,6 +139,29 @@ export class WisepanelClient {
         }
       }
     }
+  }
+
+  async magicPrompt(topic: string): Promise<MagicPromptResponse> {
+    const res = await fetch(`${this.apiUrl}/v1/magic-prompt/transform`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.getToken()}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ topic }),
+    });
+
+    const text = await res.text();
+    let parsed: Record<string, unknown> | null = null;
+    try { parsed = JSON.parse(text); } catch { /* not JSON */ }
+
+    if (!res.ok) {
+      // 402 and 500 still carry a fail_closed outcome whose text is the original
+      // topic, so callers can fall back to it rather than losing the input.
+      const msg = (parsed?.message as string) || (parsed?.error as string) || text;
+      throw new Error(`Magic Prompt failed (${res.status}): ${msg}`);
+    }
+    return parsed as unknown as MagicPromptResponse;
   }
 
   async publishToCommons(data: CommonsPublishData): Promise<CommonsPublishResult> {
