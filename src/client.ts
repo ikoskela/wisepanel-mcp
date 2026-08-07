@@ -78,8 +78,13 @@ export class WisepanelClient {
       model_group: options.model_group || 'smart',
       short_response_mode: options.short_responses || false,
       context_strategy: options.compression || 'aggressive',
-      show_and_audit_reasoning: options.show_and_audit_reasoning || false,
-      web_search_enabled: options.web_search_enabled || false,
+      // Pass undefined through rather than coercing to false. The API treats an
+      // explicit false as an opt-out and an absent field as "use the default"
+      // (show_and_audit_reasoning defaults true server-side). Coercing here made
+      // every MCP run silently opt out of audit scaffolding while the website,
+      // which omits the field, got it — same backend, opposite behavior.
+      show_and_audit_reasoning: options.show_and_audit_reasoning,
+      web_search_enabled: options.web_search_enabled,
     };
 
     const res = await fetch(
