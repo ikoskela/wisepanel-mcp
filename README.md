@@ -88,8 +88,8 @@ Start a deliberation. Convenes a panel of AI models to debate a question from as
 | Parameter | Type | Description |
 |---|---|---|
 | `question` | string (required) | The topic for the panel to deliberate |
-| `topology` | string | Panel size: `small` (faster), `medium` (balanced), `large` (thorough). Default `small` |
-| `model_group` | string | `smart` (default, current flagships), `mixed` (random across providers), `fast`, `cheap`, `informed` (search-capable), `large` (largest context). Or single provider: `openai`, `anthropic`, `anthropic-fable`, `google`, `perplexity` |
+| `topology` | string | Panel size — see [Topology](#topology). `small` (6 agents, default), `medium` (12), `large` (30) |
+| `model_group` | string | See [Model groups](#model-groups). Default `smart` |
 | `rounds` | number | Polyhedron traversals (1-5). Default `1` — see [Rounds](#rounds) |
 | `context` | string | Additional framing context |
 | `context_file` | string | Path to a file used as context, for payloads too large to pass inline. Concatenated after `context` if both are given |
@@ -97,6 +97,37 @@ Start a deliberation. Convenes a panel of AI models to debate a question from as
 | `short_responses` | boolean | Request concise panelist responses. Default `false` |
 | `show_and_audit_reasoning` | boolean | Reasoning-quality scaffolding + cross-agent audit. **Server default is on** — omit to accept it, pass `false` to opt out. ~1.45x cost |
 | `web_search_enabled` | boolean | Let agents verify factual claims via native provider web search. Requires `smart`. Default `false`. ~3.25x cost, ~6.5x combined with audit |
+
+<a name="topology"></a>
+#### Topology
+
+Agents sit on the polyhedron's **edges**, so the agent count is the edge count:
+
+| `topology` | Polyhedron | Vertices | Agents | Responses per round |
+|---|---|---|---|---|
+| `small` | tetrahedron | 4 | 6 | ~12 |
+| `medium` | octahedron | 6 | 12 | ~24 |
+| `large` | icosahedron | 12 | 30 | ~60 |
+
+Time and cost scale with agent count — `large` is 5× `small`. Escalate when a question needs
+more genuinely distinct perspectives, not when you want a better answer from the same ones.
+
+<a name="model-groups"></a>
+#### Model groups
+
+Cost is relative to `smart`, the default:
+
+| Group | Relative cost | Use when |
+|---|---|---|
+| `smart` | 1× (baseline) | default; current flagships (Opus 5, GPT-5.5, Gemini 3.1 Pro Preview) |
+| `cheap` / `fast` | ~¼× | small models; `fast` optimises latency, `cheap` optimises cost — same tier |
+| `mixed` | < 1× | random across all providers; cheaper on average, quality varies seat to seat |
+| `informed` | ~1× | search-capable models incl. Perplexity Sonar; the answer turns on current facts |
+| `large` | varies | largest context windows — for big context payloads, not better answers |
+| `anthropic-fable` | ~2× | Claude Fable 5 on every seat; only when maximum capability is explicitly wanted |
+
+Single-provider groups (`openai`, `anthropic`, `google`, `perplexity`) pin every seat to one
+vendor, which removes cross-vendor diversity — usually the point of a panel.
 
 <a name="rounds"></a>
 #### Rounds

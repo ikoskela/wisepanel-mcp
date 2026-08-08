@@ -28,12 +28,12 @@ const TOOL_DEFINITIONS = [
         topology: {
           type: 'string',
           enum: ['small', 'medium', 'large'],
-          description: 'Panel size: small (faster for exploration), medium (balanced speed & coverage), large (slow but thorough). Default: small',
+          description: 'Panel size. Agents sit on polyhedron edges, so the agent count is the edge count: small = tetrahedron, 6 agents (~12 responses per round); medium = octahedron, 12 agents (~24); large = icosahedron, 30 agents (~60). Time and cost scale with agent count — large is 5x small. Prefer small for exploration and most questions; escalate only when the question genuinely needs more distinct perspectives, not merely a better answer. Default: small',
         },
         model_group: {
           type: 'string',
           enum: ['mixed', 'smart', 'fast', 'cheap', 'informed', 'large', 'openai', 'anthropic', 'anthropic-fable', 'google', 'perplexity'],
-          description: 'Model selection: smart (most intelligent — current flagships: Opus 5, GPT-5.5, Gemini 3.1 Pro Preview), mixed (random assignment across all providers), fast (quick responses), cheap (cost-optimized), informed (search-capable), large (largest context). Or single provider: openai, anthropic, google, perplexity. anthropic-fable runs Claude Fable 5 on EVERY agent — Anthropic\'s most capable model, but roughly 2x the token cost of smart, slower, and with an older knowledge cutoff (Jan 2026 vs May 2026 for Opus 5). Do NOT select anthropic-fable unless the user has explicitly asked for maximum capability and accepted the higher cost. Default: smart (MCP use cases tend toward high-stakes deliberation where flagship rigor is worth the cost).',
+          description: 'Model selection. Cost is relative to smart, the default: cheap and fast run small models at roughly 1/4 of smart; anthropic-fable is roughly 2x smart. smart (current flagships — Opus 5, GPT-5.5, Gemini 3.1 Pro Preview; the baseline), mixed (random assignment across all providers — cheaper on average than smart, but quality varies seat to seat), fast (small models, lowest latency), cheap (small models, lowest cost — same model tier as fast), informed (search-capable models incl. Perplexity Sonar; pick when the answer turns on current facts), large (largest context windows; pick when the context payload is big, not when you want a better answer). Or single provider: openai, anthropic, anthropic-fable, google, perplexity. anthropic-fable runs Claude Fable 5 on EVERY agent — Anthropic\'s most capable model, but roughly 2x the token cost of smart, slower, and with an older knowledge cutoff (Jan 2026 vs May 2026 for Opus 5). Do NOT select anthropic-fable unless the user has explicitly asked for maximum capability and accepted the higher cost. Default: smart (MCP use cases tend toward high-stakes deliberation where flagship rigor is worth the cost).',
         },
         rounds: {
           type: 'number',
