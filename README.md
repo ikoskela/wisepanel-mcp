@@ -112,6 +112,23 @@ Agents sit on the polyhedron's **edges**, so the agent count is the edge count:
 Time and cost scale with agent count — `large` is 5× `small`. Escalate when a question needs
 more genuinely distinct perspectives, not when you want a better answer from the same ones.
 
+**Why edges rather than vertices.** Every edge of a Platonic solid is equivalent under the
+solid's symmetry group, and speaking order is balanced so no agent consistently anchors or
+consistently gets the last word. There is no hub and no privileged seat. Graph diameter stays
+small — 1, 2 and 3 respectively — so an insight raised anywhere reaches the whole panel in a
+few hops. Because each agent sits on an edge, it is simultaneously a participant and a bridge:
+propagation is a side effect of participation, with no messenger or aggregator role.
+
+| Structure | Uniform influence | Fast propagation | Cost |
+|---|---|---|---|
+| Hub-and-spoke | ✗ one position frames everything | ✓ | linear |
+| Chain / round-robin | ✗ anchoring, last-word advantage | ✗ | linear |
+| All-to-all | ✓ | ✓ | O(n²) |
+| **Polyhedral edges** | **✓** | **✓** | **linear** |
+
+All-to-all buys the same reach and uniformity at quadratic cost. Edge assignment on a regular
+polyhedron is the structure that gets both at linear cost.
+
 <a name="model-groups"></a>
 #### Model groups
 
@@ -211,6 +228,15 @@ npm install
 npm run dev
 ```
 
+## Patent pending
+
+Wisepanel's multi-agent deliberation architecture — including the polyhedral topology and the
+reasoning-audit and verification subsystems — is the subject of pending US patent applications
+assigned to QuROI, Inc.
+
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
+
+The MIT license covers the client in this repository only. It grants no license, express or
+implied, to any patent, or to the Wisepanel platform and the methods it implements.
