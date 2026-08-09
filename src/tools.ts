@@ -13,7 +13,7 @@ const TOOL_DEFINITIONS = [
   {
     name: 'wisepanel_start',
     description:
-      'Start a Wisepanel deliberation. Convenes a panel of AI models (Claude, GPT, Gemini, Perplexity) on a polyhedral topology (tetrahedron / octahedron / icosahedron for small / medium / large) ' +
+      'Start a Wisepanel deliberation. Convenes a panel of AI models from competing labs (Anthropic, OpenAI, Google, Perplexity) on a polyhedral topology (tetrahedron / octahedron / icosahedron for small / medium / large) ' +
       'to debate a question from assigned perspectives. Returns run_id immediately. ' +
       'After starting, poll with wisepanel_poll every 10-15 seconds. When an agent_response event appears, ' +
       'briefly summarize that panelist\'s key argument to the user before polling again. ' +

@@ -1,8 +1,120 @@
 # Wisepanel MCP Server
 
-An MCP server that gives [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and any MCP-compatible client direct access to [Wisepanel's](https://wisepanel.ai) multi-agent deliberation platform.
+**The decision-intelligence layer between frontier models and high-consequence decisions.**
 
-Run deliberations across Claude, Gemini, and Perplexity. Stream panelist responses in real-time. Publish to the [Wisepanel Commons](https://wisepanel.ai/commons).
+[Wisepanel](https://wisepanel.ai) takes a question, builds a panel of AI agents around it, and
+has them argue it out. You get back the positions that survived the argument, the reasoning
+behind each one, and the disagreements that never resolved.
+
+This MCP server exposes that to [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+and any MCP-compatible client.
+
+## Why
+
+A single model gives you one answer, fluently, whether or not it is right. That is fine for
+most questions. It is a bad property for the ones where being wrong is expensive.
+
+The failure usually isn't ignorance. A model commits to a framing early and then argues for
+it, so you never see the objection, the alternative, or the assumption doing the work. Ask
+again and you get the same framing in different words. Ask three models separately and you get
+three confident answers with no way to choose between them.
+
+## How it works
+
+Wisepanel builds disagreement in deliberately, at three levels.
+
+**One — each agent is handed a conflict to resolve.** Roles are derived from your question, and
+each is defined by two forces that genuinely oppose each other: cost against access, speed
+against safety, proven against new. The agent can't champion one side. It has to reach a
+position that answers both, so it arrives with something worked through rather than a talking
+point.
+
+**Two — every agent resolved a different conflict, so their positions don't match.** The agent
+holding cost against access lands somewhere the one holding speed against safety does not.
+These aren't two sides of an argument. They are several honest resolutions of the same
+question that disagree about what mattered most, and between them they cover the ground the
+question actually occupies.
+
+**Three — the structure makes them contend.** Agents are placed on the *edges* of a
+polyhedron, so each one works at two vertices — two separate conversations. At its second
+vertex an agent is not merely a participant but a delegate from the first, instructed to
+represent what its co-participants concluded there alongside its own position. Every vertex
+therefore hears whole conversations it was not part of, argued by someone who was.
+
+That last part is what makes a small panel go further than its headcount. Six agents means
+twelve seats, and each seat imports another discussion — so a point raised anywhere reaches
+the entire panel within a few hops, with no aggregator, no summarizer and no bottleneck.
+Speaking order is balanced, so no agent frames the discussion first or takes the last word.
+[Details](#topology).
+
+## Isn't this just asking three models?
+
+Pasting the same question into Claude, GPT and Gemini is a real technique, and it works for a
+real reason: different labs train on different data with different methods, so their priors
+genuinely differ. Wisepanel does the same thing — roles are spread across Anthropic, OpenAI,
+Google and Perplexity by default, so no single lab's blind spots go unchallenged.
+
+But the model is only one of the places bias enters. There are four, and doing it by hand
+reaches one.
+
+**Your framing goes to everyone unchanged.** You paste the same words three times, so you
+sample three training substrates against a single reading of the question. When the question
+carries an assumption — and questions about decisions usually do — you get three confident
+answers to the wrong question.
+[`wisepanel_magic_prompt`](#wisepanel_magic_prompt) rewrites the framing before the panel sees
+it.
+
+**Each model answers as itself.** You get Claude's median take, GPT's median take, Gemini's
+median take, and medians cluster. A model asked a neutral question gives a balanced answer;
+it will not volunteer the strongest case against your plan, because that isn't what it was
+asked for. Assigning a role changes what the model is optimising for, which produces arguments
+none of them offer unprompted.
+
+**Bouncing answers between models makes anchoring worse, not better.** Feed A's response to B
+and B now reasons inside A's framing — models tend to accept a stated position and refine it
+rather than discard it and start over. So the sequential version is more biased than three
+independent queries, and whichever model you happened to open first sets the terms. Wisepanel
+balances speaking order and spreads the conversation across vertices precisely so no single
+position gets to be the one everyone reacts to.
+
+**The reconciliation lands on you.** Three answers arrive; nothing has compared them. You do
+that work yourself, with your own priors, usually at the end of a long day on a decision you
+already lean one way about. A panel does the contending first and hands you what survived it.
+
+Then there is the part that doesn't scale by hand. Three models is three samples. A panel is
+6 to 30 roles chosen to span the question, each holding an opposition, each carrying a second
+conversation to its other vertex — twelve seats at the smallest size. You are not going to
+hand-run that, and you are certainly not going to do it consistently on every decision that
+deserves it.
+
+**Where doing it by hand wins:** it's free, it's immediate, and you keep complete control of
+the wording. For most questions that is the right trade. This is for the ones where it isn't.
+
+## Checks around the argument
+
+- **The question is checked for bias first.**
+  [`wisepanel_magic_prompt`](#wisepanel_magic_prompt) rewrites loaded framing, embedded
+  assumptions and false binaries before the panel sees them. A biased question produces a
+  confident answer to the wrong thing.
+- **Reasoning is auditable.** Agents attribute claims, surface assumptions and flag each
+  other's gaps — on by default. See [`show_and_audit_reasoning`](#wisepanel_start).
+- **Claims can be checked against sources.** Optional native web search verifies dates,
+  citations, figures and rules instead of trusting recall. See
+  [`web_search_enabled`](#wisepanel_start).
+
+## When to use it
+
+**When being wrong is expensive** — architecture calls you'll live with for years, migrations,
+security and privacy trade-offs, vendor selection, anything where you want the strongest case
+against your instinct before you commit. It is slower and costs more than a single query. That
+is the trade you are making.
+
+**Don't use it** for questions with a known answer, or where you would not act differently
+given a dissenting view.
+
+Runs stream live, so you watch the argument develop rather than waiting for a verdict.
+Completed deliberations can also be published to the
+[Wisepanel Commons](https://wisepanel.ai/commons).
 
 ## Quick Start
 
