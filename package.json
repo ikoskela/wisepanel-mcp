@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "wisepanel-mcp": "./dist/index.js"
+    "wisepanel-mcp": "dist/index.js"
   },
   "files": [
     "dist",
@@ -34,7 +34,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ikoskela/wisepanel-mcp.git"
+    "url": "git+https://github.com/ikoskela/wisepanel-mcp.git"
   },
   "homepage": "https://wisepanel.ai",
   "dependencies": {
