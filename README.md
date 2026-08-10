@@ -248,7 +248,7 @@ Cost is relative to `smart`, the default:
 
 | Group | Relative cost | Use when |
 |---|---|---|
-| `smart` | 1× (baseline) | default; current flagships (Opus 5, GPT-5.5, Gemini 3.1 Pro Preview) |
+| `smart` | 1× (baseline) | default; current flagships (Opus 5, GPT-5.6 Sol, Gemini 3.1 Pro Preview) |
 | `cheap` / `fast` | ~¼× | small models; `fast` optimises latency, `cheap` optimises cost — same tier |
 | `mixed` | < 1× | random across all providers; cheaper on average, quality varies seat to seat |
 | `informed` | ~1× | search-capable models incl. Perplexity Sonar; the answer turns on current facts |
